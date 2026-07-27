@@ -19,7 +19,7 @@ export default async function HomePage() {
       <section className="mx-auto max-w-6xl px-5 pb-24 sm:px-8">
         <Reveal className="mb-12 text-center">
           <p className="eyebrow">The Nominees</p>
-          <h2 className="mt-3 font-display text-3xl text-ink-50 sm:text-4xl">Meet This Year&apos;s Queens</h2>
+          <h2 className="mt-3 font-display text-3xl text-ink-50 sm:text-4xl">Meet This Year&apos;s Couples</h2>
           <GoldDivider className="mt-6" />
         </Reveal>
 
