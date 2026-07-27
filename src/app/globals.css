@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-ink text-ink-100 font-body antialiased;
+    background-image: radial-gradient(circle at 50% -10%, rgba(212, 175, 55, 0.12), transparent 55%),
+      radial-gradient(circle at 100% 100%, rgba(92, 10, 36, 0.25), transparent 45%);
+    background-attachment: fixed;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display text-ink-50;
+  }
+}
+
+@layer components {
+  .gold-divider {
+    @apply h-px w-full max-w-xs bg-gold-line;
+  }
+
+  .gold-hairline {
+    @apply h-px bg-gradient-to-r from-transparent via-gold-400/60 to-transparent;
+  }
+
+  .frame-card {
+    @apply relative rounded-[1.75rem] border border-gold-400/15 bg-ink-800/60 shadow-frame backdrop-blur-sm transition-all duration-500;
+  }
+
+  .frame-card:hover {
+    @apply border-gold-400/40 shadow-gold-glow -translate-y-1.5;
+  }
+
+  .btn-gold {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-6 py-3 font-body text-sm font-semibold uppercase tracking-[0.15em] text-ink-950 shadow-[0_10px_30px_-8px_rgba(212,175,55,0.55)] transition-all duration-300 hover:brightness-110 hover:shadow-[0_14px_36px_-8px_rgba(212,175,55,0.7)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none disabled:hover:brightness-100;
+  }
+
+  .btn-outline-gold {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-gold-400/50 px-6 py-3 font-body text-sm font-semibold uppercase tracking-[0.15em] text-gold-200 transition-all duration-300 hover:border-gold-300 hover:bg-gold-400/10 disabled:cursor-not-allowed disabled:opacity-40;
+  }
+
+  .field-input {
+    @apply w-full rounded-xl border border-ink-500/40 bg-ink-900/70 px-4 py-3 font-body text-ink-50 placeholder:text-ink-400 outline-none transition-colors duration-200 focus:border-gold-400/70 focus:ring-2 focus:ring-gold-400/20;
+  }
+
+  .eyebrow {
+    @apply font-body text-xs font-semibold uppercase tracking-[0.35em] text-gold-300/90;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
