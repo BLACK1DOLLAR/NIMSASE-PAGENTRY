@@ -83,7 +83,11 @@ export async function POST(req: NextRequest) {
       email,
       amountKobo,
       reference,
-      callbackUrl: `${origin}/vote/success?reference=${reference}`,
+      // Do NOT append ?reference= ourselves — Paystack already appends its
+      // own `reference` and `trxref` query params to this URL on redirect.
+      // Adding a second `reference` here creates a duplicate query key,
+      // which Next.js resolves to an array and breaks the lookup below.
+      callbackUrl: `${origin}/vote/success`,
       metadata: {
         contestantId: contestant._id.toString(),
         contestantName: contestant.name,

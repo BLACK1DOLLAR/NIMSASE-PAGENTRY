@@ -11,6 +11,9 @@ export default function Footer() {
           Votes are secured and verified server-side through Paystack. Every ₦ paid is credited only after payment
           confirmation — never on trust.
         </p>
+        <p className="font-body text-[11px] uppercase tracking-[0.2em] text-ink-500">
+          Made by Sylvanus Ikechukwu (Black Dollar)
+        </p>
       </div>
     </footer>
   );

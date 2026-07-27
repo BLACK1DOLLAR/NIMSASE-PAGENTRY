@@ -75,6 +75,11 @@ export default function VoteClient({ contestant }: VoteClientProps) {
           <div>
             <p className="eyebrow">Vote for</p>
             <h1 className="mt-2 font-display text-3xl text-ink-50">{contestant.name}</h1>
+            {contestant.msaChapter && (
+              <p className="mt-1 font-body text-xs uppercase tracking-[0.15em] text-gold-300/80">
+                {contestant.msaChapter}
+              </p>
+            )}
             <p className="mt-2 font-body text-sm text-ink-300">{contestant.bio}</p>
           </div>
 

@@ -84,6 +84,8 @@ npm run seed
 
 This inserts 6 placeholder contestants (with placeholder photos from picsum.photos) and a default voting window, only if the collection is empty. **Replace the placeholder names/bios/photos** with your real contestants — either edit `scripts/seed.ts` before running it, or manage them afterward from `/admin`.
 
+Contestant photos added via the "Upload Photo" button in `/admin` are stored directly in MongoDB (GridFS) — no extra service or env var needed, it just works as soon as `MONGODB_URI` is set. Pasting a Photo URL directly still works too.
+
 ### 6. Run locally
 
 ```bash

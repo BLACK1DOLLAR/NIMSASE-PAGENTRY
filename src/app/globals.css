@@ -46,6 +46,27 @@
 
   .field-input {
     @apply w-full rounded-xl border border-ink-500/40 bg-ink-900/70 px-4 py-3 font-body text-ink-50 placeholder:text-ink-400 outline-none transition-colors duration-200 focus:border-gold-400/70 focus:ring-2 focus:ring-gold-400/20;
+    /* Without this, the browser renders the datetime-local calendar/clock
+       icon in its default dark color, which is invisible on our dark
+       background and makes the field look inert. */
+    color-scheme: dark;
+  }
+
+  .field-input[type="datetime-local"] {
+    @apply cursor-pointer;
+  }
+
+  .field-input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    @apply cursor-pointer rounded-md p-1 transition-colors duration-200;
+    filter: invert(70%) sepia(56%) saturate(478%) hue-rotate(358deg) brightness(101%) contrast(96%);
+  }
+
+  .field-input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+    @apply bg-gold-400/15;
+  }
+
+  .preset-chip {
+    @apply rounded-full border border-ink-500/40 px-3 py-1 font-body text-xs uppercase tracking-wide text-ink-300 transition-all duration-200 hover:border-gold-400/50 hover:bg-gold-400/10 hover:text-gold-200;
   }
 
   .eyebrow {

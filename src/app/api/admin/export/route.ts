@@ -60,10 +60,11 @@ export async function GET(req: NextRequest) {
   const totalVotes = contestants.reduce((sum, c) => sum + c.voteCount, 0);
 
   const rows: (string | number)[][] = [
-    ["rank", "name", "voteCount", "sharePercent", "revenueNaira"],
+    ["rank", "name", "msaChapter", "voteCount", "sharePercent", "revenueNaira"],
     ...contestants.map((c, i) => [
       i + 1,
       c.name,
+      c.msaChapter ?? "",
       c.voteCount,
       totalVotes > 0 ? Number(((c.voteCount / totalVotes) * 100).toFixed(2)) : 0,
       c.voteCount * NAIRA_PER_VOTE,

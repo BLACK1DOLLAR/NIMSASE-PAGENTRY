@@ -45,7 +45,14 @@ export default function ResultsClient({ initialContestants }: { initialContestan
 
               <div className="min-w-0 flex-1">
                 <div className="flex items-baseline justify-between gap-2">
-                  <p className="truncate font-display text-base text-ink-50 sm:text-lg">{contestant.name}</p>
+                  <p className="truncate font-display text-base text-ink-50 sm:text-lg">
+                    {contestant.name}
+                    {contestant.msaChapter && (
+                      <span className="ml-2 font-body text-[0.65rem] uppercase tracking-[0.15em] text-gold-300/70">
+                        {contestant.msaChapter}
+                      </span>
+                    )}
+                  </p>
                   <p className="shrink-0 font-body text-sm text-gold-200">
                     {contestant.voteCount.toLocaleString("en-NG")} votes
                   </p>

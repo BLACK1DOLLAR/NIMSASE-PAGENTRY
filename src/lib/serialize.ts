@@ -8,6 +8,7 @@ export function serializeContestant(doc: ContestantDocument): ContestantDTO {
     name: doc.name,
     photoUrl: doc.photoUrl,
     bio: doc.bio,
+    msaChapter: doc.msaChapter ?? null,
     voteCount: doc.voteCount,
     createdAt: doc.createdAt.toISOString(),
   };

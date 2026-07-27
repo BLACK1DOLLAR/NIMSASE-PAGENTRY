@@ -1,26 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
-import { Contestant } from "@/lib/models/Contestant";
 import { Transaction } from "@/lib/models/Transaction";
-import { isValidPaystackSignature, verifyPaystackTransaction } from "@/lib/paystack";
+import { isValidPaystackSignature } from "@/lib/paystack";
+import { verifyAndCreditTransaction } from "@/lib/creditTransaction";
 
 export const dynamic = "force-dynamic";
 
 /**
- * The ONLY place vote counts are ever incremented. Paystack calls this after
- * a charge event. Two independent safeguards before a single vote is
- * credited:
+ * The primary path for crediting votes — Paystack calls this the moment a
+ * charge succeeds. (/api/paystack/verify has a fallback that does the same
+ * verify-and-credit for cases where this webhook never arrives, e.g. a
+ * misconfigured or unreachable webhook URL — see verifyAndCreditTransaction.)
+ *
+ * Two independent safeguards before a single vote is credited:
  *
  *  1. Signature check — the raw body must be HMAC-SHA512 signed with our
  *     Paystack secret key, proving the call actually came from Paystack.
- *  2. Server-to-server re-verification — we call Paystack's own /verify
- *     endpoint rather than trusting the webhook payload's `status`/`amount`
- *     fields, in case those were tampered with in transit.
+ *  2. Server-to-server re-verification — verifyAndCreditTransaction calls
+ *     Paystack's own /verify endpoint rather than trusting this webhook
+ *     payload's `status`/`amount` fields, in case those were tampered with
+ *     in transit.
  *
- * Idempotency is enforced at the database layer: the findOneAndUpdate below
- * only flips a transaction from non-"success" to "success" once. Paystack
- * retries webhooks aggressively (e.g. if we're slow to 200), so this must be
- * atomic rather than a read-then-write check.
+ * Idempotency is enforced at the database layer inside
+ * verifyAndCreditTransaction: a transaction only ever flips from non-
+ * "success" to "success" once, so concurrent webhook retries and/or
+ * concurrent polling from /vote/success can't double-credit.
  */
 export async function POST(req: NextRequest) {
   const rawBody = await req.text();
@@ -47,7 +51,7 @@ export async function POST(req: NextRequest) {
 
   try {
     if (event.event === "charge.success") {
-      await handleChargeSuccess(reference);
+      await verifyAndCreditTransaction(reference);
     } else if (event.event === "charge.failed") {
       await Transaction.findOneAndUpdate(
         { reference, status: "pending" },
@@ -64,37 +68,4 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json({ received: true });
-}
-
-async function handleChargeSuccess(reference: string) {
-  // Independent confirmation straight from Paystack — never trust the
-  // webhook body's own status/amount fields for crediting votes.
-  const verified = await verifyPaystackTransaction(reference);
-  if (verified.status !== "success") return;
-
-  // Atomic guard: only the first call that finds status != "success" wins
-  // the update, so concurrent/duplicate webhook deliveries can't double-credit.
-  const transaction = await Transaction.findOneAndUpdate(
-    { reference, status: { $ne: "success" } },
-    { status: "success" },
-    { new: true }
-  );
-
-  if (!transaction) {
-    // Either unknown reference, or this reference was already credited by a
-    // previous delivery of the same webhook — idempotent no-op either way.
-    return;
-  }
-
-  if (verified.amount !== transaction.amountPaid) {
-    console.error(
-      `Amount mismatch for reference ${reference}: paid ${verified.amount} kobo, expected ${transaction.amountPaid} kobo. Votes NOT credited; flagged for manual review.`
-    );
-    await Transaction.findByIdAndUpdate(transaction._id, { status: "failed" });
-    return;
-  }
-
-  await Contestant.findByIdAndUpdate(transaction.contestantId, {
-    $inc: { voteCount: transaction.votesCredited },
-  });
 }

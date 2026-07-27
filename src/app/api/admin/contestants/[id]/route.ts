@@ -26,10 +26,11 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
-  const { name, photoUrl, bio, resetVotes } = (body ?? {}) as {
+  const { name, photoUrl, bio, msaChapter, resetVotes } = (body ?? {}) as {
     name?: string;
     photoUrl?: string;
     bio?: string;
+    msaChapter?: string;
     resetVotes?: boolean;
   };
 
@@ -42,6 +43,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
   if (typeof name === "string" && name.trim()) contestant.name = name.trim();
   if (typeof photoUrl === "string" && photoUrl.trim()) contestant.photoUrl = photoUrl.trim();
   if (typeof bio === "string" && bio.trim()) contestant.bio = bio.trim();
+  if (typeof msaChapter === "string" && msaChapter.trim()) contestant.msaChapter = msaChapter.trim();
   if (resetVotes === true) contestant.voteCount = 0;
 
   await contestant.save();

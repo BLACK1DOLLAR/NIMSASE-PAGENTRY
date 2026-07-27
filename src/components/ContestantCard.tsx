@@ -29,7 +29,14 @@ export default function ContestantCard({ contestant, votingOpen, rank }: Contest
       </div>
 
       <div className="flex flex-col gap-3 px-6 pb-6 pt-4">
-        <h3 className="font-display text-xl text-ink-50 sm:text-2xl">{contestant.name}</h3>
+        <div>
+          <h3 className="font-display text-xl text-ink-50 sm:text-2xl">{contestant.name}</h3>
+          {contestant.msaChapter && (
+            <p className="mt-0.5 font-body text-xs uppercase tracking-[0.15em] text-gold-300/80">
+              {contestant.msaChapter}
+            </p>
+          )}
+        </div>
         <p className="line-clamp-3 font-body text-sm leading-relaxed text-ink-300">{contestant.bio}</p>
 
         <div className="mt-1 flex items-center justify-between gap-3">

@@ -11,11 +11,19 @@ interface AdminDashboardProps {
   initialSettings: VotingSettingsDTO;
 }
 
-function toDatetimeLocal(iso: string): string {
-  const d = new Date(iso);
+function toDatetimeLocal(date: Date): string {
   const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
+
+/** Quick-set shortcuts shown under each voting-window date field. */
+const DATE_PRESETS: { label: string; minutesFromNow: number }[] = [
+  { label: "Now", minutesFromNow: 0 },
+  { label: "+1 Hour", minutesFromNow: 60 },
+  { label: "+1 Day", minutesFromNow: 60 * 24 },
+  { label: "+1 Week", minutesFromNow: 60 * 24 * 7 },
+  { label: "+1 Month", minutesFromNow: 60 * 24 * 30 },
+];
 
 export default function AdminDashboard({ initialContestants, initialSettings }: AdminDashboardProps) {
   const router = useRouter();
@@ -23,12 +31,39 @@ export default function AdminDashboard({ initialContestants, initialSettings }: 
   const [busy, setBusy] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  const [startsAt, setStartsAt] = useState(toDatetimeLocal(initialSettings.votingStartsAt));
-  const [endsAt, setEndsAt] = useState(toDatetimeLocal(initialSettings.votingEndsAt));
+  const [startsAt, setStartsAt] = useState(toDatetimeLocal(new Date(initialSettings.votingStartsAt)));
+  const [endsAt, setEndsAt] = useState(toDatetimeLocal(new Date(initialSettings.votingEndsAt)));
+
+  function applyPreset(field: "starts" | "ends", minutesFromNow: number) {
+    const next = new Date(Date.now() + minutesFromNow * 60 * 1000);
+    if (field === "starts") setStartsAt(toDatetimeLocal(next));
+    else setEndsAt(toDatetimeLocal(next));
+  }
 
   const [newName, setNewName] = useState("");
   const [newPhoto, setNewPhoto] = useState("");
   const [newBio, setNewBio] = useState("");
+  const [newMsaChapter, setNewMsaChapter] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  async function handlePhotoFile(file: File | undefined) {
+    if (!file) return;
+    setUploadError(null);
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/admin/upload", { method: "POST", body: formData });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setNewPhoto(data.url);
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "Upload failed.");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   function flash(message: string) {
     setNotice(message);
@@ -69,7 +104,7 @@ export default function AdminDashboard({ initialContestants, initialSettings }: 
       const res = await fetch("/api/admin/contestants", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newName, photoUrl: newPhoto, bio: newBio }),
+        body: JSON.stringify({ name: newName, photoUrl: newPhoto, bio: newBio, msaChapter: newMsaChapter }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -77,6 +112,8 @@ export default function AdminDashboard({ initialContestants, initialSettings }: 
       setNewName("");
       setNewPhoto("");
       setNewBio("");
+      setNewMsaChapter("");
+      setUploadError(null);
       flash(`${data.contestant.name} added.`);
     } catch (err) {
       flash(err instanceof Error ? err.message : "Failed to add contestant.");
@@ -169,6 +206,18 @@ export default function AdminDashboard({ initialContestants, initialSettings }: 
               onChange={(e) => setStartsAt(e.target.value)}
               className="field-input"
             />
+            <div className="mt-2 flex flex-wrap gap-2">
+              {DATE_PRESETS.map((preset) => (
+                <button
+                  key={preset.label}
+                  type="button"
+                  onClick={() => applyPreset("starts", preset.minutesFromNow)}
+                  className="preset-chip"
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
           </div>
           <div>
             <label className="mb-2 block font-body text-xs uppercase tracking-[0.2em] text-ink-300">Closes At</label>
@@ -179,6 +228,18 @@ export default function AdminDashboard({ initialContestants, initialSettings }: 
               onChange={(e) => setEndsAt(e.target.value)}
               className="field-input"
             />
+            <div className="mt-2 flex flex-wrap gap-2">
+              {DATE_PRESETS.map((preset) => (
+                <button
+                  key={preset.label}
+                  type="button"
+                  onClick={() => applyPreset("ends", preset.minutesFromNow)}
+                  className="preset-chip"
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
           </div>
           <div className="sm:col-span-2">
             <button type="submit" disabled={busy === "settings"} className="btn-gold">
@@ -198,14 +259,51 @@ export default function AdminDashboard({ initialContestants, initialSettings }: 
             <input required value={newName} onChange={(e) => setNewName(e.target.value)} className="field-input" />
           </div>
           <div>
-            <label className="mb-2 block font-body text-xs uppercase tracking-[0.2em] text-ink-300">Photo URL</label>
+            <label className="mb-2 block font-body text-xs uppercase tracking-[0.2em] text-ink-300">
+              MSA Chapter
+            </label>
             <input
               required
-              value={newPhoto}
-              onChange={(e) => setNewPhoto(e.target.value)}
-              placeholder="https://…"
+              value={newMsaChapter}
+              onChange={(e) => setNewMsaChapter(e.target.value)}
+              placeholder="e.g. UNN MSA"
               className="field-input"
             />
+          </div>
+          <div>
+            <label className="mb-2 block font-body text-xs uppercase tracking-[0.2em] text-ink-300">Photo</label>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+              {newPhoto && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={newPhoto}
+                  alt="Selected contestant"
+                  className="h-16 w-16 shrink-0 rounded-xl border border-gold-400/20 object-cover"
+                />
+              )}
+              <div className="flex-1">
+                <input
+                  required
+                  value={newPhoto}
+                  onChange={(e) => setNewPhoto(e.target.value)}
+                  placeholder="https://… or upload a file below"
+                  className="field-input"
+                />
+                <div className="mt-2 flex items-center gap-3">
+                  <label className="preset-chip cursor-pointer">
+                    {uploading ? "Uploading…" : "Upload Photo"}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      disabled={uploading}
+                      onChange={(e) => handlePhotoFile(e.target.files?.[0])}
+                    />
+                  </label>
+                  {uploadError && <span className="font-body text-xs text-burgundy-200">{uploadError}</span>}
+                </div>
+              </div>
+            </div>
           </div>
           <div className="sm:col-span-2">
             <label className="mb-2 block font-body text-xs uppercase tracking-[0.2em] text-ink-300">Short Bio</label>
@@ -233,6 +331,7 @@ export default function AdminDashboard({ initialContestants, initialSettings }: 
           <thead>
             <tr className="border-b border-gold-400/15 text-left text-ink-400">
               <th className="pb-2 pr-4 font-normal uppercase tracking-wider">Name</th>
+              <th className="pb-2 pr-4 font-normal uppercase tracking-wider">MSA Chapter</th>
               <th className="pb-2 pr-4 font-normal uppercase tracking-wider">Votes</th>
               <th className="pb-2 pr-4 font-normal uppercase tracking-wider">Revenue</th>
               <th className="pb-2 font-normal uppercase tracking-wider">Actions</th>
@@ -242,6 +341,7 @@ export default function AdminDashboard({ initialContestants, initialSettings }: 
             {contestants.map((c) => (
               <tr key={c.id} className="border-b border-ink-700/60 text-ink-100">
                 <td className="py-3 pr-4">{c.name}</td>
+                <td className="py-3 pr-4 text-ink-300">{c.msaChapter ?? "—"}</td>
                 <td className="py-3 pr-4 text-gold-200">{c.voteCount.toLocaleString("en-NG")}</td>
                 <td className="py-3 pr-4">{formatNaira(c.voteCount * NAIRA_PER_VOTE)}</td>
                 <td className="py-3">
@@ -266,7 +366,7 @@ export default function AdminDashboard({ initialContestants, initialSettings }: 
             ))}
             {contestants.length === 0 && (
               <tr>
-                <td colSpan={4} className="py-6 text-center text-ink-400">
+                <td colSpan={5} className="py-6 text-center text-ink-400">
                   No contestants yet.
                 </td>
               </tr>

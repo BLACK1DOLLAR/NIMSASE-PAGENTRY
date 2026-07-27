@@ -17,31 +17,37 @@ const PLACEHOLDER_CONTESTANTS = [
     name: "Chidinma Okafor",
     photoUrl: "https://picsum.photos/seed/nimsa-chidinma/600/750",
     bio: "A final-year Medicine student and advocate for maternal health outreach across the South East.",
+    msaChapter: "UNN MSA",
   },
   {
     name: "Ngozi Eze",
     photoUrl: "https://picsum.photos/seed/nimsa-ngozi/600/750",
     bio: "Passionate about community health education, with a heart for rural clinic volunteering.",
+    msaChapter: "UNIZIK MSA",
   },
   {
     name: "Adaeze Nwosu",
     photoUrl: "https://picsum.photos/seed/nimsa-adaeze/600/750",
     bio: "Champions mental health awareness among students and young medical professionals.",
+    msaChapter: "ESUT MSA",
   },
   {
     name: "Ifeoma Chukwu",
     photoUrl: "https://picsum.photos/seed/nimsa-ifeoma/600/750",
     bio: "A gifted vocalist and public health enthusiast blending culture with community care.",
+    msaChapter: "IMSU MSA",
   },
   {
     name: "Chiamaka Obi",
     photoUrl: "https://picsum.photos/seed/nimsa-chiamaka/600/750",
     bio: "Dedicated to bridging the gap between traditional and modern healthcare practices.",
+    msaChapter: "ABSU MSA",
   },
   {
     name: "Amarachi Umeh",
     photoUrl: "https://picsum.photos/seed/nimsa-amarachi/600/750",
     bio: "An advocate for adolescent reproductive health with a warm, magnetic stage presence.",
+    msaChapter: "EBSU MSA",
   },
 ];
 

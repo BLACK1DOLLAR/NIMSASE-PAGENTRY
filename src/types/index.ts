@@ -3,6 +3,7 @@ export interface ContestantDTO {
   name: string;
   photoUrl: string;
   bio: string;
+  msaChapter: string | null;
   voteCount: number;
   createdAt: string;
 }

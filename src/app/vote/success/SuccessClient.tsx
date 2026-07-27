@@ -1,10 +1,14 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
 import { PAYMENT_STATUS_POLL_INTERVAL_MS } from "@/lib/config";
 import GoldDivider from "@/components/GoldDivider";
+
+/** After this long still "pending", reassure the voter instead of just spinning forever. */
+const LONG_WAIT_MS = 25000;
 
 interface VerifyResponse {
   status: "pending" | "success" | "failed";
@@ -20,6 +24,13 @@ export default function SuccessClient({ reference }: { reference: string | null 
       refreshInterval: (latest) => (latest && latest.status !== "pending" ? 0 : PAYMENT_STATUS_POLL_INTERVAL_MS),
     }
   );
+
+  const [longWait, setLongWait] = useState(false);
+  useEffect(() => {
+    if (!reference) return;
+    const timer = setTimeout(() => setLongWait(true), LONG_WAIT_MS);
+    return () => clearTimeout(timer);
+  }, [reference]);
 
   return (
     <section className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center px-5 py-20 text-center sm:px-8">
@@ -50,6 +61,13 @@ export default function SuccessClient({ reference }: { reference: string | null 
             <p className="mt-3 font-body text-sm text-ink-300">
               This usually takes a few seconds while Paystack confirms the charge. Please don&apos;t close this page.
             </p>
+            {longWait && (
+              <p className="mt-4 font-body text-xs text-ink-400">
+                Still going? If you completed the payment, this can occasionally take a minute — hang tight. If it&apos;s
+                been a while, contact us with reference <span className="text-ink-200">{reference}</span> and we&apos;ll
+                confirm it manually.
+              </p>
+            )}
           </>
         )}
 

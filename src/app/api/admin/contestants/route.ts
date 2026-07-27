@@ -27,9 +27,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
-  const { name, photoUrl, bio } = (body ?? {}) as { name?: string; photoUrl?: string; bio?: string };
-  if (!name?.trim() || !photoUrl?.trim() || !bio?.trim()) {
-    return NextResponse.json({ error: "name, photoUrl and bio are all required." }, { status: 400 });
+  const { name, photoUrl, bio, msaChapter } = (body ?? {}) as {
+    name?: string;
+    photoUrl?: string;
+    bio?: string;
+    msaChapter?: string;
+  };
+  if (!name?.trim() || !photoUrl?.trim() || !bio?.trim() || !msaChapter?.trim()) {
+    return NextResponse.json({ error: "name, photoUrl, bio and msaChapter are all required." }, { status: 400 });
   }
 
   await connectToDatabase();
@@ -37,6 +42,7 @@ export async function POST(req: NextRequest) {
     name: name.trim(),
     photoUrl: photoUrl.trim(),
     bio: bio.trim(),
+    msaChapter: msaChapter.trim(),
     voteCount: 0,
   });
 
