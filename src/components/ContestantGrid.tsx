@@ -29,9 +29,9 @@ export default function ContestantGrid({ initialContestants }: ContestantGridPro
   const contestants = data?.contestants ?? initialContestants;
 
   return (
-    <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4 xl:grid-cols-5">
       {contestants.map((contestant, i) => (
-        <Reveal key={contestant.id} delayMs={(i % 3) * 120}>
+        <Reveal key={contestant.id} className="h-full" delayMs={(i % 4) * 80}>
           <ContestantCard contestant={contestant} votingOpen={phase === "live"} />
         </Reveal>
       ))}
