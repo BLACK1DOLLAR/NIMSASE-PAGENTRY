@@ -1,0 +1,12 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  # Matches the "node": ">=20.9.0" engine pin in package.json.
+  NODE_VERSION = "20"
+
+# Turns the Next.js build into Netlify Functions so the App Router API routes
+# (/api/paystack/*, /api/admin/*, GridFS image serving) run server-side.
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
