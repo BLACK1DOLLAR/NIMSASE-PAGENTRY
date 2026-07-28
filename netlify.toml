@@ -6,6 +6,15 @@
   # Matches the "node": ">=20.9.0" engine pin in package.json.
   NODE_VERSION = "20"
 
+  # Netlify's secrets scanner flags these two, but neither is a secret:
+  #   NEXT_PUBLIC_SITE_URL - a NEXT_PUBLIC_* var, public by definition. It is
+  #     inlined into the paystack/initialize route at build time on purpose.
+  #   PORT - a short numeric value that coincidentally matches byte sequences
+  #     all over node_modules. The app never reads it.
+  # Every genuine secret (MONGODB_URI, PAYSTACK_SECRET_KEY, ADMIN_PASSWORD,
+  # ADMIN_SESSION_SECRET) stays scanned — do not add them to this list.
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_SITE_URL,PORT"
+
 # Turns the Next.js build into Netlify Functions so the App Router API routes
 # (/api/paystack/*, /api/admin/*, GridFS image serving) run server-side.
 [[plugins]]
